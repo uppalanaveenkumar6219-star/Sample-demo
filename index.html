@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SmartShop Enterprise</title>
+
+<style>
+body {
+  margin:0;
+  font-family: Arial;
+  background:#eef2f7;
+}
+
+header {
+  background:#1e3a8a;
+  color:white;
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+}
+
+.container {padding:20px;}
+
+.grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+}
+
+.card {
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  text-align:center;
+  box-shadow:0 4px 12px rgba(0,0,0,0.2);
+}
+
+.icon {font-size:60px;}
+
+button {
+  margin:5px;
+  padding:8px 12px;
+  border:none;
+  background:#15803d;
+  color:white;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+button.secondary {
+  background:#374151;
+}
+
+.hidden {display:none;}
+.center {text-align:center;}
+.badge {background:red;color:white;padding:5px;border-radius:50%;}
+</style>
+
+<script>
+window.dataLayer = window.dataLayer || [];
+
+function pushDL(obj){
+ window.dataLayer.push(obj);
+ console.log("DL:", obj);
+}
+
+/* PRODUCTS */
+const products = [
+ {id:"P1",name:"iPhone",price:80000,category:"Mobile",icon:"📱"},
+ {id:"P2",name:"Laptop",price:120000,category:"Laptop",icon:"💻"},
+ {id:"P3",name:"Headphones",price:15000,category:"Accessories",icon:"🎧"},
+ {id:"P4",name:"Shoes",price:3000,category:"Fashion",icon:"👟"},
+ {id:"P5",name:"Watch",price:20000,category:"Accessories",icon:"⌚"},
+ {id:"P6",name:"Camera",price:45000,category:"Gadgets",icon:"📷"}
+];
+
+let cart=[];
+let currentProduct=null;
+
+/* NAVIGATION */
+function showPage(page){
+ document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
+ document.getElementById(page).classList.remove("hidden");
+
+ pushDL({
+  event:"page_view",
+  page_name:page
+ });
+}
+
+/* LOAD PLP */
+function loadPLP(){
+ let html="";
+ products.forEach(p=>{
+  html+=`
+  <div class="card">
+   <div class="icon">${p.icon}</div>
+   <h3>${p.name}</h3>
+   <p>₹${p.price}</p>
+   <button onclick="selectProduct('${p.id}')">View</button>
+  </div>`;
+ });
+
+ document.getElementById("plpGrid").innerHTML=html;
+
+ pushDL({
+  event:"product_impression",
+  products:products
+ });
+}
+
+/* SELECT PRODUCT */
+function selectProduct(id){
+ currentProduct = products.find(p=>p.id===id);
+
+ pushDL({
+  event:"product_click",
+  product:currentProduct
+ });
+
+ showPage("pdp");
+
+ document.getElementById("pdpName").innerText=currentProduct.name;
+ document.getElementById("pdpPrice").innerText="₹"+currentProduct.price;
+ document.getElementById("pdpIcon").innerText=currentProduct.icon;
+
+ pushDL({
+  event:"product_view",
+  product:currentProduct
+ });
+}
+
+/* ADD TO CART */
+function addToCart(){
+ cart.push(currentProduct);
+ updateCart();
+
+ pushDL({
+  event:"add_to_cart",
+  product:currentProduct,
+  cart_count:cart.length
+ });
+
+ showPage("cart");
+}
+
+/* REMOVE ITEM */
+function removeItem(index){
+ let removed = cart.splice(index,1)[0];
+ updateCart();
+
+ pushDL({
+  event:"remove_from_cart",
+  product:removed
+ });
+}
+
+/* UPDATE CART */
+function updateCart(){
+ let html="";
+ let total=0;
+
+ cart.forEach((p,i)=>{
+  total+=p.price;
+  html+=`
+   <p>${p.name} - ₹${p.price} 
+   <button onclick="removeItem(${i})">Remove</button></p>`;
+ });
+
+ document.getElementById("cartItems").innerHTML=html;
+ document.getElementById("total").innerText="Total: ₹"+total;
+ document.getElementById("count").innerText=cart.length;
+}
+
+/* CHECKOUT */
+function checkout(){
+ showPage("checkout");
+
+ pushDL({
+  event:"checkout",
+  cart:cart
+ });
+}
+
+/* PURCHASE */
+function purchase(){
+ let revenue = cart.reduce((t,p)=>t+p.price,0);
+
+ pushDL({
+  event:"purchase",
+  revenue:revenue,
+  products:cart
+ });
+
+ cart=[];   // 🔥 IMPORTANT FIX
+ updateCart();
+
+ showPage("thankyou");
+}
+
+/* INIT */
+window.onload=function(){
+ showPage("home");
+ loadPLP();
+}
+</script>
+</head>
+
+<body>
+
+<header>
+ <h2>🛒 SmartShop Enterprise</h2>
+ <div>Cart: <span id="count" class="badge">0</span></div>
+</header>
+
+<div class="container">
+
+<!-- HOME -->
+<div id="home" class="page center">
+ <h2>Welcome</h2>
+ <button onclick="showPage('plp')">Start Shopping</button>
+</div>
+
+<!-- PLP -->
+<div id="plp" class="page hidden">
+ <h2>Products</h2>
+ <div id="plpGrid" class="grid"></div>
+</div>
+
+<!-- PDP -->
+<div id="pdp" class="page hidden center">
+ <div id="pdpIcon" class="icon"></div>
+ <h2 id="pdpName"></h2>
+ <p id="pdpPrice"></p>
+
+ <button onclick="addToCart()">Add to Cart</button>
+ <button class="secondary" onclick="showPage('plp')">⬅ Back</button>
+</div>
+
+<!-- CART -->
+<div id="cart" class="page hidden">
+ <h2>Cart</h2>
+ <div id="cartItems"></div>
+ <h3 id="total"></h3>
+
+ <button onclick="checkout()">Checkout</button>
+ <button class="secondary" onclick="showPage('plp')">Continue Shopping</button>
+</div>
+
+<!-- CHECKOUT -->
+<div id="checkout" class="page hidden center">
+ <h2>Checkout</h2>
+ <button onclick="purchase()">Place Order</button>
+</div>
+
+<!-- THANK YOU -->
+<div id="thankyou" class="page hidden center">
+ <h2>✅ Order Placed</h2>
+ <button onclick="showPage('plp')">Shop Again</button>
+</div>
+
+</div>
+
+</body>
+</html>
