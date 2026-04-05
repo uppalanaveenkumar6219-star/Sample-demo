@@ -2,14 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SmartShop Enterprise</title>
+<title>SmartShop Enterprise Final</title>
+
 <script src="https://assets.adobedtm.com/e72b4113c11a/f14bc6e82f88/launch-12e734470d6e.min.js" async></script>
+
 <style>
-body {
-  margin:0;
-  font-family: Arial;
-  background:#eef2f7;
-}
+body {margin:0;font-family:Arial;background:#eef2f7;}
 
 header {
   background:#1e3a8a;
@@ -17,6 +15,14 @@ header {
   padding:15px;
   display:flex;
   justify-content:space-between;
+  align-items:center;
+}
+
+.searchBox {
+  padding:6px;
+  border-radius:5px;
+  border:none;
+  width:220px;
 }
 
 .container {padding:20px;}
@@ -47,9 +53,7 @@ button {
   cursor:pointer;
 }
 
-button.secondary {
-  background:#374151;
-}
+button.secondary {background:#374151;}
 
 .hidden {display:none;}
 .center {text-align:center;}
@@ -77,6 +81,24 @@ const products = [
 let cart=[];
 let currentProduct=null;
 
+/* SEARCH */
+function searchProducts(){
+ let term = document.getElementById("searchInput").value.toLowerCase();
+
+ let filtered = products.filter(p =>
+  p.name.toLowerCase().includes(term) ||
+  p.category.toLowerCase().includes(term)
+ );
+
+ loadPLP(filtered);
+
+ pushDL({
+  event:"search",
+  search_term:term,
+  results_count:filtered.length
+ });
+}
+
 /* NAVIGATION */
 function showPage(page){
  document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
@@ -89,9 +111,9 @@ function showPage(page){
 }
 
 /* LOAD PLP */
-function loadPLP(){
+function loadPLP(list=products){
  let html="";
- products.forEach(p=>{
+ list.forEach(p=>{
   html+=`
   <div class="card">
    <div class="icon">${p.icon}</div>
@@ -105,18 +127,15 @@ function loadPLP(){
 
  pushDL({
   event:"product_impression",
-  products:products
+  products:list
  });
 }
 
-/* SELECT PRODUCT */
+/* PRODUCT */
 function selectProduct(id){
  currentProduct = products.find(p=>p.id===id);
 
- pushDL({
-  event:"product_click",
-  product:currentProduct
- });
+ pushDL({event:"product_click",product:currentProduct});
 
  showPage("pdp");
 
@@ -124,13 +143,10 @@ function selectProduct(id){
  document.getElementById("pdpPrice").innerText="₹"+currentProduct.price;
  document.getElementById("pdpIcon").innerText=currentProduct.icon;
 
- pushDL({
-  event:"product_view",
-  product:currentProduct
- });
+ pushDL({event:"product_view",product:currentProduct});
 }
 
-/* ADD TO CART */
+/* CART */
 function addToCart(){
  cart.push(currentProduct);
  updateCart();
@@ -144,18 +160,13 @@ function addToCart(){
  showPage("cart");
 }
 
-/* REMOVE ITEM */
-function removeItem(index){
- let removed = cart.splice(index,1)[0];
+function removeItem(i){
+ let removed = cart.splice(i,1)[0];
  updateCart();
 
- pushDL({
-  event:"remove_from_cart",
-  product:removed
- });
+ pushDL({event:"remove_from_cart",product:removed});
 }
 
-/* UPDATE CART */
 function updateCart(){
  let html="";
  let total=0;
@@ -163,7 +174,7 @@ function updateCart(){
  cart.forEach((p,i)=>{
   total+=p.price;
   html+=`
-   <p>${p.name} - ₹${p.price} 
+   <p>${p.name} - ₹${p.price}
    <button onclick="removeItem(${i})">Remove</button></p>`;
  });
 
@@ -175,11 +186,7 @@ function updateCart(){
 /* CHECKOUT */
 function checkout(){
  showPage("checkout");
-
- pushDL({
-  event:"checkout",
-  cart:cart
- });
+ pushDL({event:"checkout",cart:cart});
 }
 
 /* PURCHASE */
@@ -192,7 +199,7 @@ function purchase(){
   products:cart
  });
 
- cart=[];   // 🔥 IMPORTANT FIX
+ cart=[];
  updateCart();
 
  showPage("thankyou");
@@ -210,24 +217,27 @@ window.onload=function(){
 
 <header>
  <h2>🛒 SmartShop Enterprise</h2>
+
+ <!-- 🔍 SEARCH -->
+ <input id="searchInput" class="searchBox" 
+        placeholder="Search products..." 
+        onkeyup="searchProducts()">
+
  <div>Cart: <span id="count" class="badge">0</span></div>
 </header>
 
 <div class="container">
 
-<!-- HOME -->
 <div id="home" class="page center">
  <h2>Welcome</h2>
  <button onclick="showPage('plp')">Start Shopping</button>
 </div>
 
-<!-- PLP -->
 <div id="plp" class="page hidden">
  <h2>Products</h2>
  <div id="plpGrid" class="grid"></div>
 </div>
 
-<!-- PDP -->
 <div id="pdp" class="page hidden center">
  <div id="pdpIcon" class="icon"></div>
  <h2 id="pdpName"></h2>
@@ -237,7 +247,6 @@ window.onload=function(){
  <button class="secondary" onclick="showPage('plp')">⬅ Back</button>
 </div>
 
-<!-- CART -->
 <div id="cart" class="page hidden">
  <h2>Cart</h2>
  <div id="cartItems"></div>
@@ -247,13 +256,11 @@ window.onload=function(){
  <button class="secondary" onclick="showPage('plp')">Continue Shopping</button>
 </div>
 
-<!-- CHECKOUT -->
 <div id="checkout" class="page hidden center">
  <h2>Checkout</h2>
  <button onclick="purchase()">Place Order</button>
 </div>
 
-<!-- THANK YOU -->
 <div id="thankyou" class="page hidden center">
  <h2>✅ Order Placed</h2>
  <button onclick="showPage('plp')">Shop Again</button>
