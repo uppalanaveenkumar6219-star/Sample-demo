@@ -8,53 +8,14 @@
 
 <style>
 body {margin:0;font-family:Arial;background:#eef2f7;}
-
-header {
-  background:#1e3a8a;
-  color:white;
-  padding:15px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.searchBox {
-  padding:6px;
-  border-radius:5px;
-  border:none;
-  width:220px;
-}
-
+header {background:#1e3a8a;color:white;padding:15px;display:flex;justify-content:space-between;align-items:center;}
+.searchBox {padding:6px;border-radius:5px;border:none;width:220px;}
 .container {padding:20px;}
-
-.grid {
-  display:grid;
-  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
-  gap:20px;
-}
-
-.card {
-  background:white;
-  padding:15px;
-  border-radius:10px;
-  text-align:center;
-  box-shadow:0 4px 12px rgba(0,0,0,0.2);
-}
-
+.grid {display:grid;grid-template-columns: repeat(auto-fit,minmax(220px,1fr));gap:20px;}
+.card {background:white;padding:15px;border-radius:10px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.2);}
 .icon {font-size:60px;}
-
-button {
-  margin:5px;
-  padding:8px 12px;
-  border:none;
-  background:#15803d;
-  color:white;
-  border-radius:5px;
-  cursor:pointer;
-}
-
+button {margin:5px;padding:8px 12px;border:none;background:#15803d;color:white;border-radius:5px;cursor:pointer;}
 button.secondary {background:#374151;}
-
 .hidden {display:none;}
 .center {text-align:center;}
 .badge {background:red;color:white;padding:5px;border-radius:50%;}
@@ -63,9 +24,15 @@ button.secondary {background:#374151;}
 <script>
 window.dataLayer = window.dataLayer || [];
 
+/* ✅ FINAL FIX ONLY HERE */
 function pushDL(obj){
  window.dataLayer.push(obj);
  console.log("DL:", obj);
+
+ // 🔥 REQUIRED FOR LAUNCH RULES
+ if(obj && obj.event){
+   window.dispatchEvent(new Event(obj.event));
+ }
 }
 
 /* PRODUCTS */
@@ -218,7 +185,6 @@ window.onload=function(){
 <header>
  <h2>🛒 SmartShop Enterprise</h2>
 
- <!-- 🔍 SEARCH -->
  <input id="searchInput" class="searchBox" 
         placeholder="Search products..." 
         onkeyup="searchProducts()">
