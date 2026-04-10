@@ -24,15 +24,10 @@ button.secondary {background:#374151;}
 <script>
 window.dataLayer = window.dataLayer || [];
 
-/* ✅ FINAL FIX ONLY HERE */
+/* ✅ FINAL FIX — ONLY THIS FUNCTION */
 function pushDL(obj){
- window.dataLayer.push(obj);
- console.log("DL:", obj);
-
- // 🔥 REQUIRED FOR LAUNCH RULES
- if(obj && obj.event){
-   window.dispatchEvent(new Event(obj.event));
- }
+  window.dataLayer.push(obj);
+  console.log("DL:", obj);
 }
 
 /* PRODUCTS */
