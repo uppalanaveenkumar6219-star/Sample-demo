@@ -28,6 +28,11 @@ window.dataLayer = window.dataLayer || [];
 function pushDL(obj){
   window.dataLayer.push(obj);
   console.log("DL:", obj);
+
+  // ✅ TRIGGER ADOBE LAUNCH
+  if (window._satellite && typeof _satellite.track === "function") {
+    _satellite.track(obj.event);
+  }
 }
 
 /* PRODUCTS */
